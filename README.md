@@ -18,7 +18,7 @@ Go to package.json and replace the start script with
    "start": "react-app-rewired start",
 ```
 
-# Create .config overrides files
+# Create .config-overrides.js File
 
 create a file called config-overrides.js in the root directory, and paste the code below 
 
