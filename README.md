@@ -1,46 +1,169 @@
-# Getting Started with Create React App
+# Use your existing or create a new REACT app
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+```
+yarn create react-app dm3-demo-app --template typescript
+```
 
-## Available Scripts
+# Include dm3 package
 
-In the project directory, you can run:
+```
+yarn add @dm3-org/dm3-messenger-widget react-app-rewired
+```
 
-### `yarn start`
+# Add Start script
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Go to package.json and replace the start script with
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```
+   "start": "react-app-rewired start",
+```
 
-### `yarn test`
+# Create .config overrides files
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+create a file called config-overrides.js in the root directory, and paste the code below 
 
-### `yarn build`
+```JavaScript
+module.exports = function override(config) {
+    config.module.rules = config.module.rules.map((rule) => {
+        if (rule.oneOf instanceof Array) {
+            rule.oneOf[rule.oneOf.length - 1].exclude = [
+                /\.(js|mjs|jsx|cjs|ts|tsx)$/,
+                /\.html$/,
+                /\.json$/,
+            ];
+        }
+        return rule;
+    });
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+    return config;
+};
+ 
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+# Create .env file
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+_create this file in the root of the project or use existing_
 
-### `yarn eject`
+```JavaScript
+REACT_APP_ADDR_ENS_SUBDOMAIN=<ens subdomain for wallets aliasses>
+REACT_APP_USER_ENS_SUBDOMAIN=<ens subdomain for local dm3 names>
+REACT_APP_BACKEND=<url to dm3 compatible backend>
+REACT_APP_DEFAULT_DELIVERY_SERVICE=<ens name of the default delivery service>
+REACT_APP_DEFAULT_SERVICE=<url to a dm3 service>
+REACT_APP_PROFILE_BASE_URL=<url to a profile service>
+REACT_APP_RESOLVER_BACKEND=h<url to the resolver>
+REACT_APP_WALLET_CONNECT_PROJECT_ID=27b3e102adae76b4d4902a035da435e7
+REACT_APP_MAINNET_PROVIDER_RPC=<rpc for ethereum mainnet>
+RESOLVER_ADDR=<address of the resolver>
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+**Example 1: dm3 config:**
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
+REACT_APP_ADDR_ENS_SUBDOMAIN=.addr.dm3.eth
+REACT_APP_USER_ENS_SUBDOMAIN=.user.dm3.eth
+REACT_APP_BACKEND=https://app.dm3.network/api
+REACT_APP_DEFAULT_DELIVERY_SERVICE=ds.dm3.eth
+REACT_APP_DEFAULT_SERVICE=https://app.dm3.network/api
+REACT_APP_PROFILE_BASE_URL=https://app.dm3.network/api
+REACT_APP_RESOLVER_BACKEND=https://app.dm3.network/resolver-handler
+REACT_APP_WALLET_CONNECT_PROJECT_ID=27b3e102adae76b4d4902a035da435e7
+REACT_APP_MAINNET_PROVIDER_RPC=https://eth-mainnet.g.alchemy.com/v2/<apikey>
+RESOLVER_ADDR=0xae6646c22D8eE6479eE0a39Bf63B9bD9e57bAD9d
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+**Example 2: dm3 test config (Goerli):**
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```
+REACT_APP_ADDR_ENS_SUBDOMAIN=.beta-addr.dm3.eth
+REACT_APP_USER_ENS_SUBDOMAIN=.beta-user.dm3.eth
+REACT_APP_BACKEND=http://134.122.95.165/api
+REACT_APP_DEFAULT_DELIVERY_SERVICE=beta-ds.dm3.eth
+REACT_APP_DEFAULT_SERVICE=http://134.122.95.165/api
+REACT_APP_PROFILE_BASE_URL=http://134.122.95.165/api
+REACT_APP_RESOLVER_BACKEND=http://134.122.95.165/resolver-handler
+REACT_APP_USER_ENS_SUBDOMAIN=.beta-user.dm3.eth
+REACT_APP_WALLET_CONNECT_PROJECT_ID=27b3e102adae76b4d4902a035da435e7
+REACT_APP_MAINNET_PROVIDER_RPC=https://eth-goerli.g.alchemy.com/v2/<apikey>
+RESOLVER_ADDR=0xae6646c22D8eE6479eE0a39Bf63B9bD9e57bAD9d
+```
 
-## Learn More
+# Import dm3 pack into app
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+_open src/App.tsx_
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```JavaScript
+// @ts-ignore
+import { DM3 } from '@dm3-org/dm3-messenger-widget';
+```
+
+# Add dm3 widget
+
+```JavaScript
+const props: any = {
+   defaultContact: 'contact.dm3.eth',
+   defaultServiceUrl: process.env.REACT_APP_DEFAULT_SERVICE,
+   ethereumProvider: process.env.REACT_APP_MAINNET_PROVIDER_RPC,
+   walletConnectProjectId: process.env.REACT_APP_WALLET_CONNECT_PROJECT_ID,
+   showAlways: true,
+   hideFunction: "attachments", // OPTINAL PARAMETER : 'attachments,edit,delete' or undefined
+   showContacts: true, // true for all contacts / false for default contact
+   theme: undefined, // OPTINAL PARAMETER : undefined/themeColors
+};
+
+...
+
+<DM3 {...props} />
+```
+
+\*\*Example: React App
+
+```JavaScript
+import React from 'react';
+import logo from './logo.svg';
+import './App.css';
+
+// @ts-ignore
+import { DM3 } from '@dm3-org/dm3-messenger-widget';
+
+  function App() {
+    const props: any = {
+        defaultContact: 'help.dm3.eth',
+        defaultServiceUrl: process.env.REACT_APP_DEFAULT_SERVICE,
+        ethereumProvider: process.env.REACT_APP_MAINNET_PROVIDER_RPC,
+        walletConnectProjectId: process.env.REACT_APP_WALLET_CONNECT_PROJECT_ID,
+        showAlways: true,
+        hideFunction: "attachments", // OPTINAL PARAMETER : 'attachments,edit,delete' or undefined
+        showContacts: true, // true for all contacts / false for default contact
+        theme: undefined, // OPTINAL PARAMETER : undefined/themeColors
+    };
+
+    return (
+        <div >
+              <DM3 {...props} />
+        </div>
+    );
+}
+
+export default App;
+```
+
+# Add some resources
+
+_add pictures in public:_
+
+favicon.png
+
+![image](https://user-images.githubusercontent.com/26625404/268010477-81f519df-e0aa-4a2e-b5ff-debcb4fcafa4.png)
+
+dm3_logo.png
+
+![favicon](https://user-images.githubusercontent.com/26625404/268011515-5086fa70-76d2-46af-adc9-383523ed2e23.png)
+
+# Add/Change configurations
+
+```JavaScript
+   defaultContact={'<ens_name>'}
+   showAlways={true/false}
+   showContacts={true/false}
+```
